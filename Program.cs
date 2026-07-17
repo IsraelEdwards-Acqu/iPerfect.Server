@@ -1,4 +1,4 @@
-using iPerfect.Services;
+﻿using iPerfect.Services;
 using iPerfect.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +17,25 @@ builder.Services.AddScoped<FileFormatService>();
 // Add HttpClient factory for AiService remote calls
 builder.Services.AddHttpClient();
 
+// ✅ Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowNetlify", policy =>
+    {
+        policy.WithOrigins("https://iperfect.netlify.app") // your Netlify domain
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Middleware
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+// ✅ Enable CORS before mapping controllers
+app.UseCors("AllowNetlify");
 
 // Map controllers
 app.MapControllers();
